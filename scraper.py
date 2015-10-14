@@ -1,24 +1,24 @@
-# This is a template for a Python scraper on morph.io (https://morph.io)
-# including some code snippets below that you should find helpful
+import requests
+import scraperwiki
+from pyquery import PyQuery as pq
 
-# import scraperwiki
-# import lxml.html
-#
-# # Read in a page
-# html = scraperwiki.scrape("http://foo.com")
-#
-# # Find something on the page using css selectors
-# root = lxml.html.fromstring(html)
-# root.cssselect("div[align='left']")
-#
-# # Write out to the sqlite database using scraperwiki library
-# scraperwiki.sqlite.save(unique_keys=['name'], data={"name": "susan", "occupation": "software developer"})
-#
-# # An arbitrary query against the database
+BASE = 'http://www.isrctn.com'
+
+i = 1
+while i > 0:
+    url = '%s/search?pageSize=100&q=&page=%s' % (BASE, i)
+    req = requests.get(url)
+    doc = pq(req.text)
+    titles = doc('.ResultsList_item_title a')
+    for title in titles:
+        num = title.text.split(':')[0].strip()
+        scraperwiki.sqlite.save(unique_keys=['id'],
+                                data={"id": num})
+    print i, len(titles)
+    if len(titles):
+        i += 1
+    else:
+        i = 0
+
+
 # scraperwiki.sql.select("* from data where 'name'='peter'")
-
-# You don't have to do things with the ScraperWiki and lxml libraries.
-# You can use whatever libraries you want: https://morph.io/documentation/python
-# All that matters is that your final data is written to an SQLite database
-# called "data.sqlite" in the current working directory which has at least a table
-# called "data".
